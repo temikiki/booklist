@@ -63,8 +63,61 @@ UI.prototype.clearFields = function(){
   document.getElementById('isbn').value = '';
 }
 
+function Store(){
 
+}
 
+function getbook(){
+  let books;
+  if(localStorage.getItem('books') === null){
+    books =[];
+  }else{
+    books = JSON.parse(localStorage.getItem('books'));
+  }
+  return books;
+}
+Store.prototype.getBook = function(){
+ let books;
+  if(localStorage.getItem('books') === null){
+    books =[];
+  }else{
+    books = JSON.parse(localStorage.getItem('books'));
+  }
+  return books;
+};
+
+Store.prototype.displayBook = function(){
+  const books = getbook();
+
+  books.forEach(function(book){
+    const ui = new UI;
+
+    ui.addBookToList(book);
+  });
+};
+
+Store.prototype.addBook = function(book){
+  const books = getbook();
+
+  books.push(book);
+
+  localStorage.setItem('books', JSON.stringify(books));
+};
+
+Store.prototype.removeBook = function(isbn){
+  const books = getbook();
+
+  books.forEach(function(book, index){
+    if(book.isbn === isbn){
+      books.splice(index, 1);
+    }
+  });
+  localStorage.setItem('books', JSON.stringify(books));
+};
+
+const store = new Store();
+// DOM Load Event
+document.addEventListener('DOMContentLoaded', store.displayBook);
 
 document.getElementById('book-form').addEventListener("submit", function(e){
 
@@ -80,11 +133,18 @@ document.getElementById('book-form').addEventListener("submit", function(e){
 
   const ui = new UI();
 
+  //instantiate Store
+
+  const store = new Store();
+
   if(title === '' || author ==='' || isbn ===''){
     ui.showAlert('Please fill out all fields', 'error')
   }else{
     //add book to list
     ui.addBookToList(book);
+     //add to locsl storage
+     store.addBook(book);
+
 
     //show success
     ui.showAlert('book Added!', 'success');
@@ -106,7 +166,11 @@ document.getElementById('book-list').addEventListener('click', function(e){
 
   const ui = new UI();
 
+  const store = new Store();
+
   ui.deleteBook(e.target);
+
+  store.removeBook(e.target.parentElement.previousElementSibling.textContent);
 
   ui.showAlert('book deleted', 'success');
 
